@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .text_field {
+    @apply flex flex-col gap-0.5;
+  }
+
+  .text_field label {
+    @apply font-sans text-base text-slate-500;
+  }
+
+  .text_field input,
+  .text_field textarea {
+    @apply rounded-sm border border-solid border-slate-300 px-2 pb-1 pt-1.5 font-sans text-base text-slate-900 outline-none;
+  }
+
+  .text_field.is_large input {
+    @apply px-3 pb-2 pt-2.5 text-2xl;
+  }
+
+  .text_field input:focus-visible {
+    @apply shadow-focus;
+  }
+
+  .text_field .error {
+    @apply font-sans text-sm text-red-700;
+  }
+
+  .btn {
+    @apply cursor-pointer rounded-sm border border-solid border-slate-200 px-2.5 py-1 font-sans text-base text-slate-700 outline-none;
+  }
+
+  .btn:hover {
+    @apply bg-slate-100;
+  }
+
+  .btn_primary {
+    @apply border-slate-800 bg-slate-800 text-white;
+  }
+
+  .btn_primary:hover {
+    @apply border-slate-900 bg-slate-900;
+  }
+
+  .btn_primary:focus-visible {
+    @apply shadow-focus;
+  }
+
+  .table {
+    @apply border border-solid border-slate-200;
+  }
+
+  .table thead td {
+    @apply border-b border-solid border-slate-200 bg-slate-50 px-4 pb-1.5 pt-2 font-sans text-base;
+  }
+
+  .table tbody td {
+    @apply border-b border-solid border-slate-200 p-4 font-sans text-base;
+  }
+
+  .table tr:hover td {
+    @apply bg-slate-50;
+  }
+}
