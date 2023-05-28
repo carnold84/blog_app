@@ -1,12 +1,16 @@
-import { Outlet } from "react-router-dom";
+import { NavLink, Outlet } from "react-router-dom";
+
+import Logo from "../../../shared/components/Logo";
 
 const Layout = () => {
   return (
     <div>
-      <header className="p-3 text-2xl font-semibold">
-        <h1>Less Sleep</h1>
+      <header className="px-8 py-9">
+        <NavLink className="text-text-500" title="Home" to="/">
+          <Logo />
+        </NavLink>
       </header>
-      <main className="p-3">
+      <main>
         <Outlet />
       </main>
     </div>

@@ -1,6 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 
-import useArticle from "../../../shared/hooks/useArticle";
+import useArticle from "../../hooks/useArticle";
 
 const ArticlePage = () => {
   const { id } = useParams();
@@ -16,7 +16,7 @@ const ArticlePage = () => {
           {article ? (
             <div>
               <h1>{article.title}</h1>
-              <p>{article.body}</p>
+              <p>{article.content}</p>
             </div>
           ) : (
             <p>Article not found</p>

@@ -1,1 +1,1 @@
-export * as articlesApi from "./articles";
+export * as default from "./demo";

@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
-import useArticles from "../../../shared/hooks/useArticles";
+import useArticles from "../../hooks/useArticles";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -26,7 +26,7 @@ const DashboardPage = () => {
             </tr>
           </thead>
           <tbody>
-            {articles.map(({ created, id, published, title }) => {
+            {articles.map(({ createdAt, id, publishedAt, title }) => {
               return (
                 <tr
                   className="cursor-pointer"
@@ -34,10 +34,10 @@ const DashboardPage = () => {
                   onClick={() => onRowClick(id)}
                 >
                   <td className="font-bold">{title}</td>
-                  <td>{Intl.DateTimeFormat().format(new Date(created))}</td>
-                  <td>{Intl.DateTimeFormat().format(new Date(published))}</td>
+                  <td>{Intl.DateTimeFormat().format(new Date(createdAt))}</td>
+                  <td>{Intl.DateTimeFormat().format(new Date(publishedAt))}</td>
                   <td width={40}>
-                    <div className="btn">Edit</div>
+                    <div className="btn btn_text">Edit</div>
                   </td>
                 </tr>
               );

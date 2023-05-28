@@ -1,7 +1,10 @@
 import { ReactNode, createContext, useEffect, useState } from "react";
 
-import LoadingScreen from "../../shared/component/LoadingScreen";
-import { authApi } from "../api";
+import api from "../../shared/api";
+import LoadingScreen from "../../shared/components/LoadingScreen";
+import { Article } from "../../shared/types";
+import { articlesApi, authApi } from "../api";
+import { ArticleResponse } from "../api/articles";
 import { AuthResponse, SignIn } from "../api/auth";
 import { User } from "../types";
 
@@ -10,16 +13,20 @@ interface Props {
 }
 
 interface Context {
+  articles: Article[];
   status: "error" | "loading" | "success";
   signIn: (payload: SignIn) => Promise<AuthResponse> | null;
   signOut: () => Promise<AuthResponse> | null;
+  updateArticle: (payload: Article) => Promise<ArticleResponse> | null;
   user: User | undefined;
 }
 
 const initialState: Context = {
+  articles: [],
   status: "loading",
   signIn: () => null,
   signOut: () => null,
+  updateArticle: () => null,
   user: undefined,
 };
 
@@ -91,17 +98,21 @@ const AdminProvider = ({ children }: Props) => {
     }
   };
 
-  const getUser = async () => {
-    const response = await authApi.getUser();
+  const updateArticle = async (article: Article): Promise<ArticleResponse> => {
+    const response = await articlesApi.updateArticle(article);
 
     if (response.status === "success") {
       setState((prev) => {
         return {
           ...prev,
+          article: response.article,
           status: "success",
-          user: response.user,
         };
       });
+
+      return {
+        status: "success",
+      };
     } else {
       setState((prev) => {
         return {
@@ -110,11 +121,66 @@ const AdminProvider = ({ children }: Props) => {
           user: undefined,
         };
       });
+
+      return {
+        message: response.message,
+        status: "success",
+      };
     }
   };
 
   useEffect(() => {
-    getUser();
+    const getUser = async () => {
+      const response = await authApi.getUser();
+
+      if (response.status === "success") {
+        return response.user;
+      } else {
+        setState((prev) => {
+          return {
+            ...prev,
+            status: "error",
+            user: undefined,
+          };
+        });
+      }
+    };
+
+    const loadArticles = async () => {
+      const data = await api.getArticles();
+
+      if (data) {
+        return data;
+      } else {
+        setState((prev) => {
+          return {
+            ...prev,
+            status: "error",
+          };
+        });
+      }
+    };
+
+    const init = async () => {
+      const user = await getUser();
+
+      if (user) {
+        const articles = await loadArticles();
+
+        if (articles) {
+          setState((prev) => {
+            return {
+              ...prev,
+              articles,
+              status: "success",
+              user,
+            };
+          });
+        }
+      }
+    };
+
+    init();
   }, []);
 
   if (state.status === "loading") {
@@ -122,7 +188,7 @@ const AdminProvider = ({ children }: Props) => {
   }
 
   return (
-    <AdminContext.Provider value={{ ...state, signIn, signOut }}>
+    <AdminContext.Provider value={{ ...state, signIn, signOut, updateArticle }}>
       {children}
     </AdminContext.Provider>
   );

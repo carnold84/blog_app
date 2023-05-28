@@ -57,11 +57,11 @@ const SignInPage = () => {
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center">
-      <div className="flex w-full max-w-sm flex-col gap-3 border border-solid border-slate-300 p-5">
+      <div className="flex w-full max-w-sm flex-col gap-3 border border-solid border-neutral-300 p-5">
         <h1 className="font-sans text-xl">Sign In</h1>
         <form className="flex w-full flex-col gap-3" onSubmit={onSubmit}>
           {errors.form && (
-            <p className="border border-solid border-red-200 bg-red-50 px-3.5 py-2.5 font-sans text-base text-red-900">
+            <p className="border-red-200 bg-red-50 text-red-900 border border-solid px-3.5 py-2.5 font-sans text-base">
               {errors.form}
             </p>
           )}

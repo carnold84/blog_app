@@ -1,8 +1,8 @@
 import { ReactNode, createContext, useEffect, useState } from "react";
 
-import { articlesApi } from "../api";
-import LoadingScreen from "../component/LoadingScreen";
-import { Article } from "../types";
+import api from "../../shared/api";
+import LoadingScreen from "../../shared/components/LoadingScreen";
+import { Article } from "../../shared/types";
 
 interface Props {
   children: ReactNode;
@@ -25,12 +25,21 @@ const AppProvider = ({ children }: Props) => {
 
   useEffect(() => {
     const loadArticles = async () => {
-      const data = await articlesApi.getArticles();
+      const data = await api.getArticles();
 
-      setState({
-        articles: data,
-        status: "success",
-      });
+      if (data) {
+        setState({
+          articles: data,
+          status: "success",
+        });
+      } else {
+        setState((prev) => {
+          return {
+            ...prev,
+            status: "error",
+          };
+        });
+      }
     };
 
     loadArticles();

@@ -1,10 +1,19 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires, no-undef
+/* eslint-disable no-undef */
+/* eslint-disable @typescript-eslint/no-var-requires */
 const colors = require("tailwindcss/colors");
+const theme = require("./src/config/theme");
 
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
+    colors: {
+      inherit: colors.inherit,
+      current: colors.current,
+      ...theme.colors,
+      transparent: colors.transparent,
+      red: colors.red,
+    },
     fontSize: {
       sm: ["0.75rem", "1rem"],
       base: ["0.875rem", "1.25rem"],
@@ -15,18 +24,18 @@ export default {
       "4xl": ["2.25rem", "2.5rem"],
     },
     fontWeight: {
-      normal: 400,
-      bold: 500,
+      normal: 300,
+      bold: 400,
     },
     extend: {
       animation: {
         loading: "spin 650ms linear infinite",
       },
       borderColor: {
-        loading: `${colors.slate[700]} transparent`,
+        loading: `${theme.colors.neutral[700]} transparent`,
       },
       boxShadow: {
-        focus: `0 0 0 3px ${colors.slate[300]}`,
+        focus: `0 0 0 3px ${theme.colors.neutral[300]}`,
       },
       fontFamily: {
         sans: ["Poppins", "sans-serif"],

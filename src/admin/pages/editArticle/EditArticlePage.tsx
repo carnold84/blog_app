@@ -1,39 +1,43 @@
+import classNames from "classnames";
 import { ChangeEvent, lazy, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import rehypeSanitize from "rehype-sanitize";
 
-import Loading from "../../../shared/component/Loading";
-import useArticle from "../../../shared/hooks/useArticle";
+import Loading from "../../../shared/components/Loading";
 import toSentenceCase from "../../../shared/utils/toSentenceCase";
+import useArticle from "../../hooks/useArticle";
 
 const MDEditor = lazy(() => import("@uiw/react-md-editor"));
 
 interface FormErrors {
-  body: string;
-  published: string;
-  title: string;
+  content: boolean;
+  publishDate: boolean;
+  title: boolean;
 }
 
 const EditArticlePage = () => {
   const { id } = useParams();
   const { article, isError, isLoading } = useArticle(id);
-  const { created, status, title, updated } = article;
+  const { createdAt, status, title, updatedAt } = article;
   const [formData, setFormData] = useState({
-    body: "",
-    published: "",
+    content: "",
+    publishDate: "",
     title: "",
   });
   const [formErrors, setFormErrors] = useState<FormErrors>({
-    body: "",
-    published: "",
-    title: "",
+    content: false,
+    publishDate: false,
+    title: false,
   });
 
   useEffect(() => {
     if (article) {
+      console.log;
       setFormData({
-        body: article.body,
-        published: Intl.DateTimeFormat().format(new Date(article.published)),
+        content: article.content,
+        publishDate: Intl.DateTimeFormat().format(
+          new Date(article.publishedAt)
+        ),
         title: article.title,
       });
     }
@@ -48,11 +52,11 @@ const EditArticlePage = () => {
     });
   };
 
-  const onBodyChange = (value: string | undefined) => {
+  const onContentChange = (value: string | undefined) => {
     setFormData((prev) => {
       return {
         ...prev,
-        body: value ?? "",
+        content: value ?? "",
       };
     });
   };
@@ -61,23 +65,28 @@ const EditArticlePage = () => {
     setFormData((prev) => {
       return {
         ...prev,
-        published: evt.target.value ?? "",
+        publishDate: evt.target.value ?? "",
       };
     });
   };
 
   const onSave = () => {
-    const nextFormErrors: FormErrors = {
-      body: "",
-      published: "",
-      title: "",
+    const nextFormErrors = {
+      content: false,
+      publishDate: false,
+      title: false,
     };
 
-    for (const key in formData) {
-      if (formData[key as keyof typeof formData] === "") {
-        nextFormErrors[key as keyof typeof formData] =
-          "Please fill in this field.";
-      }
+    if (formData.content === "") {
+      nextFormErrors.content = true;
+    }
+
+    if (formData.publishDate === "") {
+      nextFormErrors.publishDate = true;
+    }
+
+    if (formData.title === "") {
+      nextFormErrors.title = true;
     }
 
     setFormErrors(nextFormErrors);
@@ -89,60 +98,96 @@ const EditArticlePage = () => {
       {isLoading && <Loading />}
       {!isLoading && !isError && (
         <>
-          <div className="mb-3 flex gap-2">
-            <Link className="font-sans text-xl text-slate-500" to="/admin">
-              Articles
+          <div className="mb-5 flex items-center gap-2">
+            <Link
+              className="p-1 font-sans text-xl text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800"
+              to="/admin"
+            >
+              <svg
+                width="18px"
+                height="18px"
+                viewBox="0 0 24 24"
+                strokeWidth="2.5"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                color="currentcolor"
+              >
+                <path
+                  d="M21 12H3m0 0l8.5-8.5M3 12l8.5 8.5"
+                  stroke="currentcolor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                ></path>
+              </svg>
             </Link>
-            <p className="font-sans text-xl">&gt;</p>
-            <h2 className="font-sans text-xl text-slate-500">
-              Edit <strong className="text-slate-900">{title}</strong>
+            <h2 className="font-sans text-xl text-neutral-500">
+              Edit <strong className="text-neutral-900">{title}</strong>
             </h2>
           </div>
-          <div className="flex w-full grow gap-5">
-            <div className="relative flex h-full grow flex-col">
-              <div className="text_field is_large mb-3">
-                <input onChange={onTitleChange} value={formData.title} />
-              </div>
-              <div className="relative grow" data-color-mode="light">
-                <MDEditor
-                  height={"100%"}
-                  onChange={onBodyChange}
-                  previewOptions={{
-                    rehypePlugins: [[rehypeSanitize]],
-                  }}
-                  style={{
-                    height: "100%",
-                    position: "absolute",
-                    width: "100%",
-                  }}
-                  value={formData.body}
+          <div className="flex w-full grow gap-10">
+            <div className="relative flex h-full grow flex-col gap-5">
+              <div className="text_field is_large">
+                <input
+                  className={classNames({
+                    is_error: formErrors.title === true,
+                  })}
+                  id="title"
+                  onChange={onTitleChange}
+                  value={formData.title}
                 />
               </div>
+              <div className="flex grow flex-col">
+                <div className="relative grow" data-color-mode="light">
+                  <MDEditor
+                    className={classNames({
+                      is_error: formErrors.content === true,
+                    })}
+                    height={"100%"}
+                    id="content"
+                    onChange={onContentChange}
+                    previewOptions={{
+                      rehypePlugins: [[rehypeSanitize]],
+                    }}
+                    style={{
+                      height: "100%",
+                      position: "absolute",
+                      width: "100%",
+                    }}
+                    value={formData.content}
+                  />
+                </div>
+              </div>
             </div>
-            <div className="flex w-64 flex-col gap-3">
-              <p className="font-sans text-base text-slate-500">
+            <div className="flex w-64 flex-col gap-5">
+              <p className="font-sans text-base text-neutral-500">
                 Status:{" "}
-                <span className="text-slate-800">{toSentenceCase(status)}</span>
-              </p>
-              <p className="font-sans text-base text-slate-500">
-                Created:{" "}
-                <span className="text-slate-800">
-                  {Intl.DateTimeFormat().format(new Date(created))}
+                <span className="text-neutral-800">
+                  {toSentenceCase(status)}
                 </span>
               </p>
-              <p className="font-sans text-base text-slate-500">
+              <p className="font-sans text-base text-neutral-500">
+                Created:{" "}
+                <span className="text-neutral-800">
+                  {Intl.DateTimeFormat().format(new Date(createdAt))}
+                </span>
+              </p>
+              <p className="font-sans text-base text-neutral-500">
                 Updated:{" "}
-                <span className="text-slate-800">
-                  {Intl.DateTimeFormat().format(new Date(updated))}
+                <span className="text-neutral-800">
+                  {Intl.DateTimeFormat().format(new Date(updatedAt))}
                 </span>
               </p>
 
               <div className="text_field">
                 <label htmlFor="publish_date">Publish Date</label>
                 <input
+                  className={classNames({
+                    is_error: formErrors.publishDate === true,
+                  })}
                   id="publish_date"
                   onChange={onPublishedChange}
-                  value={formData.published}
+                  value={formData.publishDate}
                 />
               </div>
               <div className="flex gap-2">
@@ -151,7 +196,6 @@ const EditArticlePage = () => {
                 </button>
                 <button className="btn">Publish</button>
               </div>
-              <div>{JSON.stringify(formErrors)}</div>
             </div>
           </div>
         </>
