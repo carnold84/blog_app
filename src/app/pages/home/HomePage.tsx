@@ -1,90 +1,164 @@
-import classNames from "classnames";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 
+import Card from "../../components/Card";
 import useArticles from "../../hooks/useArticles";
 
-const layout = [
-  [
-    {
-      active: 66,
-      default: 50,
-    },
-    {
-      active: 50,
-      default: 25,
-    },
-    {
-      active: 50,
-      default: 25,
-    },
+const layout = {
+  sm: [
+    [
+      {
+        active: 100,
+        default: 100,
+      },
+    ],
+    [
+      {
+        active: 100,
+        default: 100,
+      },
+    ],
+    [
+      {
+        active: 100,
+        default: 100,
+      },
+    ],
+    [
+      {
+        active: 100,
+        default: 100,
+      },
+    ],
   ],
-  [
-    {
-      active: 33,
-      default: 25,
-    },
-    {
-      active: 45,
-      default: 37.5,
-    },
-    {
-      active: 45,
-      default: 37.5,
-    },
+  md: [
+    [
+      {
+        active: 75,
+        default: 60,
+      },
+      {
+        active: 55,
+        default: 40,
+      },
+    ],
+    [
+      {
+        active: 55,
+        default: 40,
+      },
+      {
+        active: 75,
+        default: 60,
+      },
+    ],
+    [
+      {
+        active: 65,
+        default: 50,
+      },
+      {
+        active: 65,
+        default: 50,
+      },
+    ],
+    [
+      {
+        active: 55,
+        default: 35,
+      },
+      {
+        active: 80,
+        default: 65,
+      },
+    ],
   ],
-  [
-    {
-      active: 50,
-      default: 33,
-    },
-    {
-      active: 50,
-      default: 33,
-    },
-    {
-      active: 50,
-      default: 33,
-    },
+  lg: [
+    [
+      {
+        active: 66,
+        default: 50,
+      },
+      {
+        active: 50,
+        default: 25,
+      },
+      {
+        active: 50,
+        default: 25,
+      },
+    ],
+    [
+      {
+        active: 33,
+        default: 25,
+      },
+      {
+        active: 45,
+        default: 37.5,
+      },
+      {
+        active: 45,
+        default: 37.5,
+      },
+    ],
+    [
+      {
+        active: 50,
+        default: 33,
+      },
+      {
+        active: 50,
+        default: 33,
+      },
+      {
+        active: 50,
+        default: 33,
+      },
+    ],
+    [
+      {
+        active: 33,
+        default: 25,
+      },
+      {
+        active: 66,
+        default: 50,
+      },
+      {
+        active: 33,
+        default: 25,
+      },
+    ],
   ],
-  [
-    {
-      active: 33,
-      default: 25,
-    },
-    {
-      active: 66,
-      default: 50,
-    },
-    {
-      active: 33,
-      default: 25,
-    },
-  ],
-];
+};
+
+const getLayoutSize = (width: number) => {
+  if (width >= 800) {
+    return "md";
+  } else if (width >= 1000) {
+    return "lg";
+  }
+
+  return "sm";
+};
 
 const HomePage = () => {
   const { articles, isError, isLoading } = useArticles();
   const [currentRowIdx, setCurrentRowIdx] = useState<number | null>(null);
   const [currentColumnIdx, setCurrentColumnIdx] = useState<number | null>(null);
+  const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth);
 
-  /* const elements = useMemo(() => {
-    if (articles) {
-      const numRows = Math.ceil(articles.length / 4);
-      const rows = []
+  const updateContentWidth = () => {
+    setWindowWidth(window.innerWidth);
+  };
 
-      for (let i = 0; i < numRows; i++) {
-        const article = 
-        rows.push(<div>
-          {articles}
-        </div>)
-      }
+  useEffect(() => {
+    window.addEventListener("resize", updateContentWidth);
 
-      return (
-        <div></div>
-      )
-    }
-  }, articles) */
+    return () => {
+      window.removeEventListener("resize", updateContentWidth);
+    };
+  }, []);
 
   const onCardMouseOver = (columnIdx: number, rowIdx: number) => {
     setCurrentRowIdx(rowIdx);
@@ -96,96 +170,76 @@ const HomePage = () => {
     setCurrentColumnIdx(null);
   };
 
+  const layoutSize = getLayoutSize(windowWidth);
+  const currentLayout = layout[layoutSize];
+
   return (
     <div>
       {isError && <div>An error occurred :(</div>}
       {isLoading && <div>Loading...</div>}
       {!isLoading && !isError && (
-        <div className="flex flex-wrap px-8 pb-8">
-          {articles.map(({ description, id, publishedAt, title }, i) => {
-            const rowIdx = Math.floor(i / 3);
-            const columnIdx = i % 3;
+        <div className="flex flex-col px-8 pb-8">
+          {currentLayout.map((row, rowIdx) => {
+            const firstArticle = articles[rowIdx * row.length];
 
-            let width = layout[rowIdx][columnIdx].default;
+            if (firstArticle) {
+              return (
+                <div
+                  className="flex w-full overflow-hidden"
+                  key={firstArticle.id}
+                >
+                  {row.map((column, columnIdx) => {
+                    const article = articles[rowIdx * row.length + columnIdx];
+                    if (article) {
+                      const { description, id, publishedAt, title } = article;
+                      let width = column.default;
 
-            if (currentColumnIdx !== null && rowIdx === currentRowIdx) {
-              if (columnIdx === currentColumnIdx) {
-                width = layout[rowIdx][columnIdx].active;
-              } else {
-                const activeColumn = layout[currentRowIdx][currentColumnIdx];
+                      if (
+                        currentColumnIdx !== null &&
+                        rowIdx === currentRowIdx
+                      ) {
+                        if (columnIdx === currentColumnIdx) {
+                          width = column.active;
+                        } else {
+                          const activeColumn =
+                            currentLayout[currentRowIdx][currentColumnIdx];
 
-                width = (100 - activeColumn.active) / 2;
-              }
+                          width =
+                            (100 - activeColumn.active) / (row.length - 1);
+                        }
+                      }
+
+                      const isCardActive =
+                        layoutSize === "sm"
+                          ? true
+                          : rowIdx === currentRowIdx &&
+                            columnIdx === currentColumnIdx;
+                      const isRowActive =
+                        layoutSize === "sm" ? true : rowIdx === currentRowIdx;
+
+                      return (
+                        <Card
+                          date={publishedAt}
+                          description={description}
+                          height={isRowActive ? "340px" : "200px"}
+                          isActive={isCardActive}
+                          key={id}
+                          onMouseOut={onCardMouseOut}
+                          onMouseOver={() => onCardMouseOver(columnIdx, rowIdx)}
+                          title={title}
+                          to={`/article/${id}`}
+                          width={`${width}%`}
+                        />
+                      );
+                    }
+
+                    return null;
+                  })}
+                </div>
+              );
             }
 
-            return (
-              <div
-                className={classNames(
-                  "flex h-52 cursor-pointer flex-col justify-end gap-2 overflow-hidden p-3 transition-all duration-500",
-                  {
-                    "h-48": rowIdx !== currentRowIdx,
-                    "h-64": rowIdx === currentRowIdx,
-                  }
-                )}
-                key={id}
-                style={{ width: `${width}%` }}
-              >
-                <Link
-                  className="group relative h-full w-full overflow-hidden border border-solid border-neutral-100 bg-neutral-50"
-                  onMouseOver={() => onCardMouseOver(columnIdx, rowIdx)}
-                  onMouseOut={onCardMouseOut}
-                  to={`/article/${id}`}
-                >
-                  <h2
-                    className={classNames(
-                      "absolute left-10 top-10 origin-top-left text-text-200 transition-all duration-500 group-hover:text-text-500",
-                      {
-                        "text-xl":
-                          rowIdx !== currentRowIdx ||
-                          columnIdx !== currentColumnIdx,
-                        "text-2xl":
-                          rowIdx === currentRowIdx &&
-                          columnIdx === currentColumnIdx,
-                      }
-                    )}
-                  >
-                    {title}
-                  </h2>
-                  <p
-                    className={classNames(
-                      "absolute left-10 top-20 origin-top-left text-base text-text-100 transition-all delay-100 duration-500",
-                      {
-                        "text-base":
-                          rowIdx !== currentRowIdx ||
-                          columnIdx !== currentColumnIdx,
-                        "text-2xl":
-                          rowIdx === currentRowIdx &&
-                          columnIdx === currentColumnIdx,
-                      }
-                    )}
-                  >
-                    {description}
-                  </p>
-                  <p
-                    className={classNames(
-                      "absolute left-10 origin-top-left text-lg text-neutral-200 transition-all delay-100 duration-500 group-hover:text-text-500",
-                      {
-                        "-bottom-10 opacity-0":
-                          rowIdx !== currentRowIdx ||
-                          columnIdx !== currentColumnIdx,
-                        "bottom-10 opacity-100":
-                          rowIdx === currentRowIdx &&
-                          columnIdx === currentColumnIdx,
-                      }
-                    )}
-                  >
-                    {Intl.DateTimeFormat(undefined, {
-                      dateStyle: "full",
-                    }).format(new Date(publishedAt))}
-                  </p>
-                </Link>
-              </div>
-            );
+            return null;
           })}
         </div>
       )}

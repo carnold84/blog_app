@@ -19,7 +19,7 @@ export const getArticles = async () => {
   data = getData();
 
   if (data === null) {
-    const response = await fetch("demo_data.json");
+    const response = await fetch("/demo_data.json");
     data = await response.json();
     saveData(data);
   }
